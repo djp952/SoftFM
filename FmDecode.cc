@@ -331,8 +331,16 @@ FmDecoder::FmDecoder(double sample_rate_if,
 void FmDecoder::process(const IQSampleVector& samples_in,
                         SampleVector& audio)
 {
+   process(samples_in.data(), samples_in.size(), audio);
+}
+
+
+void FmDecoder::process(const IQSample* samples_in,
+                        size_t num_samples_in,
+                        SampleVector& audio)
+{
     // Fine tuning.
-    m_finetuner.process(samples_in, m_buf_iftuned);
+    m_finetuner.process(samples_in, num_samples_in, m_buf_iftuned);
 
     // Low pass filter to isolate station.
     m_iffilter.process(m_buf_iftuned, m_buf_iffiltered);

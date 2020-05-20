@@ -153,6 +153,10 @@ public:
     void process(const IQSampleVector& samples_in,
                  SampleVector& audio);
 
+    void process(const IQSample* samples_in,
+                 size_t num_samples_in,
+                 SampleVector& audio);
+
     /** Return true if a stereo signal is detected. */
     bool stereo_detected() const
     {

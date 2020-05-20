@@ -67,16 +67,16 @@ FineTuner::FineTuner(unsigned int table_size, int freq_shift)
 
 
 // Process samples.
-void FineTuner::process(const IQSampleVector& samples_in,
+void FineTuner::process(const IQSample* samples_in,
+                        size_t num_samples_in,
                         IQSampleVector& samples_out)
 {
     unsigned int tblidx = m_index;
     unsigned int tblsiz = m_table.size();
-    unsigned int n = samples_in.size();
 
-    samples_out.resize(n);
+    samples_out.resize(num_samples_in);
 
-    for (unsigned int i = 0; i < n; i++) {
+    for (unsigned int i = 0; i < num_samples_in; i++) {
         samples_out[i] = samples_in[i] * m_table[tblidx];
         tblidx++;
         if (tblidx == tblsiz)

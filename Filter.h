@@ -22,7 +22,7 @@ public:
     FineTuner(unsigned int table_size, int freq_shift);
 
     /** Process samples. */
-    void process(const IQSampleVector& samples_in, IQSampleVector& samples_out);
+    void process(const IQSample* samples_in, size_t num_samples_in, IQSampleVector& samples_out);
 
 private:
     unsigned int    m_index;
