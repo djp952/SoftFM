@@ -82,6 +82,8 @@ void PhaseDiscriminator::process(const IQSampleVector& samples_in,
 
 /* ****************  class PilotPhaseLock  **************** */
 
+const int PilotPhaseLock::pilot_frequency = 19000;
+
 // Construct phase-locked loop.
 PilotPhaseLock::PilotPhaseLock(double freq, double bandwidth, double minsignal)
 {
@@ -250,6 +252,12 @@ void PilotPhaseLock::process(const SampleVector& samples_in,
 
 
 /* ****************  class FmDecoder  **************** */
+
+const double FmDecoder::default_deemphasis    =     50;
+const double FmDecoder::default_bandwidth_if  = 100000;
+const double FmDecoder::default_freq_dev      =  75000;
+const double FmDecoder::default_bandwidth_pcm =  15000;
+const double FmDecoder::pilot_freq            =  19000;
 
 FmDecoder::FmDecoder(double sample_rate_if,
                      double tuning_offset,
