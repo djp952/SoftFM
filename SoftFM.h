@@ -18,8 +18,8 @@ inline void samples_mean_rms(const SampleVector& samples,
     Sample vsum = 0;
     Sample vsumsq = 0;
 
-    unsigned int n = samples.size();
-    for (unsigned int i = 0; i < n; i++) {
+    size_t n = samples.size();
+    for (size_t i = 0; i < n; i++) {
         Sample v = samples[i];
         vsum   += v;
         vsumsq += v * v;

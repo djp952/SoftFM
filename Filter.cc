@@ -38,13 +38,13 @@ static void make_lanczos_coeff(unsigned int filter_order, double cutoff,
                 ( sin(M_PI * x2) / M_PI / x2 );
         }
 
-        coeff[i] = y;
+        coeff[i] = static_cast<T>(y);
         ysum += y;
     }
 
     // Apply correction factor to ensure unit gain at DC.
     for (unsigned i = 0; i <= filter_order; i++) {
-        coeff[i] /= ysum;
+        coeff[i] /= static_cast<T>(ysum);
     }
 }
 
@@ -61,7 +61,7 @@ FineTuner::FineTuner(unsigned int table_size, int freq_shift)
         double phi = (((int64_t)freq_shift * i) % table_size) * phase_step;
         double pcos = cos(phi);
         double psin = sin(phi);
-        m_table[i] = IQSample(pcos, psin);
+        m_table[i] = IQSample(static_cast<IQSample::value_type>(pcos), static_cast<IQSample::value_type>(psin));
     }
 }
 
@@ -72,7 +72,7 @@ void FineTuner::process(const IQSample* samples_in,
                         IQSampleVector& samples_out)
 {
     unsigned int tblidx = m_index;
-    unsigned int tblsiz = m_table.size();
+    size_t tblsiz = m_table.size();
 
     samples_out.resize(num_samples_in);
 
@@ -101,8 +101,8 @@ LowPassFilterFirIQ::LowPassFilterFirIQ(unsigned int filter_order, double cutoff)
 void LowPassFilterFirIQ::process(const IQSampleVector& samples_in,
                                  IQSampleVector& samples_out)
 {
-    unsigned int order = m_state.size();
-    unsigned int n = samples_in.size();
+    size_t order = m_state.size();
+    size_t n = samples_in.size();
 
     samples_out.resize(n);
 
@@ -117,9 +117,9 @@ void LowPassFilterFirIQ::process(const IQSampleVector& samples_in,
     unsigned int i = 0;
     for (; i < n && i < order; i++) {
         IQSample y = 0;
-        for (unsigned int j = 0; j < order - i; j++)
+        for (size_t j = 0; j < order - i; j++)
             y += m_state[i+j] * m_coeff[j];
-        for (unsigned int j = order - i; j <= order; j++)
+        for (size_t j = order - i; j <= order; j++)
             y += samples_in[i-order+j] * m_coeff[j];
         samples_out[i] = y;
     }
@@ -170,8 +170,8 @@ DownsampleFilter::DownsampleFilter(unsigned int filter_order, double cutoff,
 void DownsampleFilter::process(const SampleVector& samples_in,
                                SampleVector& samples_out)
 {
-    unsigned int order = m_state.size();
-    unsigned int n = samples_in.size();
+    size_t order = m_state.size();
+    unsigned int n = static_cast<unsigned int>(samples_in.size());
 
     if (m_downsample_int != 0) {
 
@@ -286,11 +286,11 @@ void LowPassFilterRC::process(const SampleVector& samples_in,
     Sample a1 = - exp(-1/m_timeconst);;
     Sample b0 = 1 + a1;
 
-    unsigned int n = samples_in.size();
+    size_t n = samples_in.size();
     samples_out.resize(n);
 
     Sample y = m_y1;
-    for (unsigned int i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         Sample x = samples_in[i];
         y = b0 * x - a1 * y;
         samples_out[i] = y;
@@ -306,10 +306,10 @@ void LowPassFilterRC::process_inplace(SampleVector& samples)
     Sample a1 = - exp(-1/m_timeconst);;
     Sample b0 = 1 + a1;
 
-    unsigned int n = samples.size();
+    size_t n = samples.size();
 
     Sample y = m_y1;
-    for (unsigned int i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         Sample x = samples[i];
         y = b0 * x - a1 * y;
         samples[i] = y;
@@ -366,11 +366,11 @@ LowPassFilterIir::LowPassFilterIir(double cutoff)
 void LowPassFilterIir::process(const SampleVector& samples_in,
                                SampleVector& samples_out)
 {
-    unsigned int n = samples_in.size();
+    size_t n = samples_in.size();
 
     samples_out.resize(n);
 
-    for (unsigned int i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         Sample x = samples_in[i];
         Sample y = b0 * x - a1 * y1 - a2 * y2 - a3 * y3 - a4 * y4;
         y4 = y3; y3 = y2; y2 = y1; y1 = y;
@@ -425,11 +425,11 @@ HighPassFilterIir::HighPassFilterIir(double cutoff)
 void HighPassFilterIir::process(const SampleVector& samples_in,
                                 SampleVector& samples_out)
 {
-    unsigned int n = samples_in.size();
+    size_t n = samples_in.size();
 
     samples_out.resize(n);
 
-    for (unsigned int i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         Sample x = samples_in[i];
         Sample y = b0 * x + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2;
         x2 = x1; x1 = x;
@@ -442,9 +442,9 @@ void HighPassFilterIir::process(const SampleVector& samples_in,
 // Process samples in-place.
 void HighPassFilterIir::process_inplace(SampleVector& samples)
 {
-    unsigned int n = samples.size();
+    size_t n = samples.size();
 
-    for (unsigned int i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         Sample x = samples[i];
         Sample y = b0 * x + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2;
         x2 = x1; x1 = x;

@@ -7,40 +7,40 @@
 using namespace std;
 
 
-/** Fast approximation of atan function. */
-static inline Sample fast_atan(Sample x)
-{
-    // http://stackoverflow.com/questions/7378187/approximating-inverse-trigonometric-funcions
-
-    Sample y = 1;
-    Sample p = 0;
-
-    if (x < 0) {
-        x = -x;
-        y = -1;
-    }
-
-    if (x > 1) {
-        p = y;
-        y = -y;
-        x = 1 / x;
-    }
-
-    const Sample b = 0.596227;
-    y *= (b*x + x*x) / (1 + 2*b*x + x*x);
-
-    return (y + p) * Sample(M_PI_2);
-}
+///** Fast approximation of atan function. */
+//static inline Sample fast_atan(Sample x)
+//{
+//    // http://stackoverflow.com/questions/7378187/approximating-inverse-trigonometric-funcions
+//
+//    Sample y = 1;
+//    Sample p = 0;
+//
+//    if (x < 0) {
+//        x = -x;
+//        y = -1;
+//    }
+//
+//    if (x > 1) {
+//        p = y;
+//        y = -y;
+//        x = 1 / x;
+//    }
+//
+//    const Sample b = 0.596227;
+//    y *= (b*x + x*x) / (1 + 2*b*x + x*x);
+//
+//    return (y + p) * Sample(M_PI_2);
+//}
 
 
 /** Compute RMS level over a small prefix of the specified sample vector. */
 static IQSample::value_type rms_level_approx(const IQSampleVector& samples)
 {
-    unsigned int n = samples.size();
+    size_t n = samples.size();
     n = (n + 63) / 64;
 
     IQSample::value_type level = 0;
-    for (unsigned int i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         const IQSample& s = samples[i];
         IQSample::value_type re = s.real(), im = s.imag();
         level += re * re + im * im;
@@ -62,12 +62,12 @@ PhaseDiscriminator::PhaseDiscriminator(double max_freq_dev)
 void PhaseDiscriminator::process(const IQSampleVector& samples_in,
                                  SampleVector& samples_out)
 {
-    unsigned int n = samples_in.size();
+    size_t n = samples_in.size();
     IQSample s0 = m_last_sample;
 
     samples_out.resize(n);
 
-    for (unsigned int i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         IQSample s1(samples_in[i]);
         IQSample d(conj(s0) * s1);
 // TODO : implement fast approximation of atan2
@@ -148,7 +148,7 @@ PilotPhaseLock::PilotPhaseLock(double freq, double bandwidth, double minsignal)
 void PilotPhaseLock::process(const SampleVector& samples_in,
                              SampleVector& samples_out)
 {
-    unsigned int n = samples_in.size();
+    size_t n = samples_in.size();
 
     samples_out.resize(n);
 
@@ -158,7 +158,7 @@ void PilotPhaseLock::process(const SampleVector& samples_in,
     if (n > 0)
         m_pilot_level = 1000.0;
 
-    for (unsigned int i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
 
         // Generate locked pilot tone.
         Sample psin = sin(m_phase);
@@ -234,7 +234,7 @@ void PilotPhaseLock::process(const SampleVector& samples_in,
     // Update lock status.
     if (2 * m_pilot_level > m_minsignal) {
         if (m_lock_cnt < m_lock_delay)
-            m_lock_cnt += n;
+            m_lock_cnt += static_cast<int>(n);
     } else {
         m_lock_cnt = 0;
     }
@@ -419,10 +419,10 @@ void FmDecoder::demod_stereo(const SampleVector& samples_baseband,
     // And multiply by two to get the full amplitude.
     // That's all.
 
-    unsigned int n = samples_baseband.size();
+    size_t n = samples_baseband.size();
     assert(n == samples_rawstereo.size());
 
-    for (unsigned int i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         samples_rawstereo[i] *= 2 * samples_baseband[i];
     }
 }
@@ -432,10 +432,10 @@ void FmDecoder::demod_stereo(const SampleVector& samples_baseband,
 void FmDecoder::mono_to_left_right(const SampleVector& samples_mono,
                                    SampleVector& audio)
 {
-    unsigned int n = samples_mono.size();
+    size_t n = samples_mono.size();
 
     audio.resize(2*n);
-    for (unsigned int i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         Sample m = samples_mono[i];
         audio[2*i]   = m;
         audio[2*i+1] = m;
@@ -448,11 +448,11 @@ void FmDecoder::stereo_to_left_right(const SampleVector& samples_mono,
                                      const SampleVector& samples_stereo,
                                      SampleVector& audio)
 {
-    unsigned int n = samples_mono.size();
+    size_t n = samples_mono.size();
     assert(n == samples_stereo.size());
 
     audio.resize(2*n);
-    for (unsigned int i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         Sample m = samples_mono[i];
         Sample s = samples_stereo[i];
         audio[2*i]   = m + s;
